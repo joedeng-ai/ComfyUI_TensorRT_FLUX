@@ -157,6 +157,8 @@ class TensorRTLoader:
         elif model_type == "flux_dev":
             conf = comfy.supported_models.Flux({})
             conf.unet_config["disable_unet_model_creation"] = True
+            conf.unet_config["in_channels"] = 16
+            conf.unet_config["out_channels"] = 16
             model = conf.get_model({})
             unet.dtype = torch.bfloat16 #TODO: autodetect
         elif model_type == "flux_schnell":
