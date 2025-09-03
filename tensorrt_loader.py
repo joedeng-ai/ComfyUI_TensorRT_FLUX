@@ -166,6 +166,9 @@ class TensorRTLoader:
             conf.unet_config["disable_unet_model_creation"] = True
             model = conf.get_model({})
             unet.dtype = torch.bfloat16 #TODO: autodetect
+        else:
+            raise Exception(f"model_type:{model_type}")
+            
         model.diffusion_model = unet
         model.memory_required = lambda *args, **kwargs: 0 #always pass inputs batched up as much as possible, our TRT code will handle batch splitting
 
