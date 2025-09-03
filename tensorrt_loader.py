@@ -114,7 +114,7 @@ class TensorRTLoader:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {"unet_name": (folder_paths.get_filename_list("tensorrt"), ),
-                             "model_type": (["sdxl_base", "sdxl_refiner", "sd1.x", "sd2.x-768v", "svd", "sd3", "auraflow", "flux_dev", "flux_schnell"], ),
+                             "model_type": (["sdxl_base", "sdxl_refiner", "sd1.x", "sd2.x-768v", "svd", "sd3", "auraflow", "flux_dev", "flux_schnell", "wan2.2"], ),
                              }}
     RETURN_TYPES = ("MODEL",)
     FUNCTION = "load_unet"
@@ -166,6 +166,10 @@ class TensorRTLoader:
             conf.unet_config["disable_unet_model_creation"] = True
             model = conf.get_model({})
             unet.dtype = torch.bfloat16 #TODO: autodetect
+        elif model_type == "wan2.2":
+            conf = comfy.supported_models.WAN22_T2V({})
+            model = conf.get_model({})
+            unet.dtype = torch.float16
         else:
             raise Exception(f"model_type:{model_type}")
             
