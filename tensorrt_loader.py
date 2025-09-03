@@ -8,6 +8,7 @@ import comfy.model_management
 import comfy.model_patcher
 import comfy.supported_models
 import folder_paths
+import types
 
 if "tensorrt" in folder_paths.folder_names_and_paths:
     folder_paths.folder_names_and_paths["tensorrt"][0].append(
@@ -125,6 +126,7 @@ class TensorRTLoader:
         if not os.path.isfile(unet_path):
             raise FileNotFoundError(f"File {unet_path} does not exist")
         unet = TrTUnet(unet_path)
+        print(f"model_type:{model_type}")
         if model_type == "sdxl_base":
             conf = comfy.supported_models.SDXL({"adm_in_channels": 2816})
             conf.unet_config["disable_unet_model_creation"] = True
@@ -167,12 +169,14 @@ class TensorRTLoader:
             model = conf.get_model({})
             unet.dtype = torch.bfloat16 #TODO: autodetect
         elif model_type == "wan2.2":
-            conf = comfy.supported_models.WAN22_T2V({})
+            conf = comfy.supported_models.WAN21_T2V({})
+            conf.unet_config["disable_unet_model_creation"] = True
             model = conf.get_model({})
+            setattr(unet, 'patch_embedding', types.SimpleNamespace(weight=torch.zeros((5120, 16, 1, 2, 2))))
             unet.dtype = torch.float16
         else:
             raise Exception(f"model_type:{model_type}")
-            
+        print(f"unet type: {type(unet)}")
         model.diffusion_model = unet
         model.memory_required = lambda *args, **kwargs: 0 #always pass inputs batched up as much as possible, our TRT code will handle batch splitting
 
